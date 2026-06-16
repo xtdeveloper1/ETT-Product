@@ -124,22 +124,24 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <Navbar />
 
       {/* Product Section */}
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 md:py-8">
-        <div className="grid gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 items-start">
-          {/* Image Gallery - Left */}
-          <div>
-            <ProductGallery
-              productImages={productDetails.images}
-              primaryImage={primaryImage}
-            />
-          </div>
+      <main className="w-full bg-white">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6 lg:py-8">
+          <div className="grid gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 items-start">
+            {/* Image Gallery - Left */}
+            <div className="w-full order-1 lg:order-1">
+              <ProductGallery
+                productImages={productDetails.images}
+                primaryImage={primaryImage}
+              />
+            </div>
 
-          {/* Product Details - Right */}
-          <div>
-            <ProductDetails
-              product={product}
-              features={productDetails.features}
-            />
+            {/* Product Details - Right */}
+            <div className="w-full order-2 lg:order-2">
+              <ProductDetails
+                product={product}
+                features={productDetails.features}
+              />
+            </div>
           </div>
         </div>
       </main>

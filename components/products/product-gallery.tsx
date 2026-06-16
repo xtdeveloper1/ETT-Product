@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { X } from "lucide-react";
 import type { ProductImage } from "@/services/product-details-service";
 
 interface ProductGalleryProps {
@@ -14,32 +14,17 @@ export default function ProductGallery({
   productImages = [],
   primaryImage,
 }: ProductGalleryProps) {
-  const images =
-    productImages.length > 0
-      ? productImages
-          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-          .map((img) => img.image_url)
-          .filter(Boolean)
-      : primaryImage
-      ? [primaryImage]
-      : ["/images/categories/panel.jpg"];
-
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
-
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [images]);
-
-  const handleNext = () => {
-    setSelectedIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const handlePrev = () => {
-    setSelectedIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  const selectedImage = images[selectedIndex];
+  const sortedProductImages = [...productImages].sort(
+    (a, b) => (a.sort_order || 0) - (b.sort_order || 0)
+  );
+  const selectedImage =
+    primaryImage ||
+    sortedProductImages.find((img) => img.is_primary)?.image_url ||
+    sortedProductImages.find((img) => img.image_url)?.image_url ||
+    "/images/categories/panel.jpg";
+  const isRemoteImage =
+    selectedImage.startsWith("http") || selectedImage.includes("supabase");
 
   return (
     <>
@@ -56,61 +41,10 @@ export default function ProductGallery({
             priority
             className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width:768px) 100vw, 50vw"
+            unoptimized={isRemoteImage}
           />
         </button>
-
-        {/* Navigation arrows */}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={handlePrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all"
-              aria-label="Previous image"
-            >
-              <ChevronLeft size={18} className="text-slate-900" />
-            </button>
-            <button
-              onClick={handleNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all"
-              aria-label="Next image"
-            >
-              <ChevronRight size={18} className="text-slate-900" />
-            </button>
-          </>
-        )}
-
-        {/* Image counter */}
-        {images.length > 1 && (
-          <div className="absolute top-3 right-3 bg-black/70 px-2 py-1 rounded text-xs font-medium text-white">
-            {selectedIndex + 1} / {images.length}
-          </div>
-        )}
       </div>
-
-      {/* Thumbnails */}
-      {images.length > 1 && (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-          {images.map((img, index) => (
-            <button
-              key={index}
-              onClick={() => setSelectedIndex(index)}
-              className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded overflow-hidden border transition-all ${
-                selectedIndex === index
-                  ? "border-blue-600 ring-2 ring-blue-300"
-                  : "border-slate-200 hover:border-slate-300"
-              }`}
-            >
-              <Image
-                src={img}
-                alt={`Thumbnail ${index + 1}`}
-                width={80}
-                height={80}
-                className="w-full h-full object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Zoom Modal */}
       {isZoomed && (
@@ -136,6 +70,7 @@ export default function ProductGallery({
               width={1600}
               height={1600}
               className="w-full h-auto object-contain max-h-[90vh]"
+              unoptimized={isRemoteImage}
             />
           </div>
         </div>

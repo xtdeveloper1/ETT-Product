@@ -33,7 +33,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#E2E8F0] bg-[#FAFBFC]/95 backdrop-blur">
-      <div className="container-page flex h-auto items-center justify-between gap-3 py-3">
+      <div className="container-page flex h-16 items-center justify-between gap-3">
 
         {/* Logo */}
 
@@ -42,9 +42,9 @@ export default function Navbar() {
           <Image
             src="/images/brand/ett-green-logo.png"
             alt="ETT logo"
-            width={100}
-            height={100}
-            className="h-18 w-18 sm:h-16 sm:w-16 lg:h-20 lg:w-20 object-contain"
+            width={48}
+            height={48}
+            className="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 object-contain"
             priority
           />
 

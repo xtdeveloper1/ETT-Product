@@ -83,19 +83,22 @@ export default function RelatedProducts() {
             href={`/product/${product.slug}`}
             className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition block"
           >
-            <div className="relative bg-slate-100 h-64">
+            <div className="relative bg-slate-100 w-full overflow-hidden" style={{ paddingBottom: "100%" }}>
               {product.discount && (
                 <span className="absolute top-3 left-3 z-10 bg-slate-900 text-white text-xs font-semibold px-2 py-1 rounded-full">
                   {product.discount}
                 </span>
               )}
-              <Image 
-                src={product.image_url || "/images/placeholder.jpg"} 
-                alt={product.name} 
-                fill
-                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="w-full h-full object-contain p-4"
-              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Image 
+                  src={product.image_url || "/images/placeholder.jpg"} 
+                  alt={product.name} 
+                  width={300}
+                  height={300}
+                  className="w-full h-auto object-contain p-4"
+                  unoptimized={(product.image_url || "").startsWith("http") || (product.image_url || "").includes("supabase")}
+                />
+              </div>
             </div>
 
             <div className="p-4">

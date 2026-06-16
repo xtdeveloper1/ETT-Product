@@ -60,14 +60,18 @@ export default function ProductCard({ product, product_id, category_id }: Produc
           {product.discount}
         </span>
 
-        <div className="relative h-[184px] w-full bg-white sm:aspect-square sm:h-auto">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 50vw, 25vw"
-            className="h-full w-full object-contain p-4 sm:p-4"
-          />
+        <div className="relative w-full overflow-hidden bg-white" style={{ paddingBottom: "100%" }}>
+          <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-4">
+            <Image
+              src={product.image}
+              alt={product.name}
+              width={300}
+              height={300}
+              className="h-auto w-full object-contain"
+              priority={false}
+              unoptimized={product.image.startsWith("http") || product.image.includes("supabase")}
+            />
+          </div>
         </div>
       </div>
 

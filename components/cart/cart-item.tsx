@@ -22,9 +22,10 @@ export default function CartItem({
         <Image
           src={item.image_url}
           alt={item.name}
-          fill
-          sizes="110px"
-          className="object-contain p-2"
+          width={110}
+          height={110}
+          className="h-full w-full object-contain p-2"
+          unoptimized={item.image_url.startsWith("http") || item.image_url.includes("supabase")}
         />
       </div>
 

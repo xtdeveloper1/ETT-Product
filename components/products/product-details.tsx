@@ -93,14 +93,14 @@ export default function ProductDetails({
     : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-24 md:pb-0">
       {/* Category */}
       <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
         {product.category_name || "Product"}
       </p>
 
       {/* Title */}
-      <h1 className="text-xl md:text-2xl font-bold text-slate-900">
+      <h1 className="text-lg md:text-2xl font-bold text-slate-900 leading-tight break-words">
         {product.name}
       </h1>
 
@@ -110,18 +110,18 @@ export default function ProductDetails({
         <span className="font-semibold text-slate-900">{product.rating || "5.0 (0 reviews)"}</span>
       </div>
 
-      {/* Price */}
-      <div className="flex items-center gap-3 py-3 border-y border-slate-200">
-        <span className="text-2xl font-bold text-slate-900">
+      {/* Price - Responsive */}
+      <div className="flex flex-wrap items-center gap-2 py-3 border-y border-slate-200">
+        <span className="text-2xl md:text-3xl font-bold text-slate-900">
           ₹{Number(product.price || 0).toLocaleString()}
         </span>
         {(product.oldPrice ?? product.old_price ?? 0) > 0 && (
           <>
-            <span className="text-sm text-slate-500 line-through">
+            <span className="text-sm md:text-base text-slate-500 line-through">
               ₹{Number(product.oldPrice ?? product.old_price).toLocaleString()}
             </span>
             {discountPercentage > 0 && (
-              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded">
+              <span className="text-xs md:text-sm font-bold text-red-600 bg-red-50 px-2 py-1 rounded">
                 Save {discountPercentage}%
               </span>
             )}
@@ -129,11 +129,11 @@ export default function ProductDetails({
         )}
       </div>
 
-      <p className="text-xs text-slate-600">Inclusive of all taxes</p>
+      <p className="text-xs md:text-sm text-slate-600">Inclusive of all taxes</p>
 
       {/* Description */}
       {product.description && (
-        <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+        <p className="text-sm md:text-base text-slate-700 leading-relaxed whitespace-pre-line">
           {product.description}
         </p>
       )}
@@ -151,14 +151,14 @@ export default function ProductDetails({
       )}
 
       {/* Quantity and Actions */}
-      <div className="space-y-3 pt-3 border-t border-slate-200">
+      <div className="space-y-3 pt-3 border-t border-slate-200 md:relative md:pt-4">
         <div>
           <label className="block text-xs font-semibold text-slate-900 mb-2 uppercase">Quantity</label>
           <div className="flex items-center gap-2 w-fit">
             <button
               type="button"
               onClick={() => setQuantity((v) => Math.max(1, v - 1))}
-              className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-100"
+              className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-100 transition-colors"
             >
               −
             </button>
@@ -168,18 +168,18 @@ export default function ProductDetails({
             <button
               type="button"
               onClick={() => setQuantity((v) => v + 1)}
-              className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-100"
+              className="px-3 py-1.5 border border-slate-300 rounded hover:bg-slate-100 transition-colors"
             >
               +
             </button>
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row gap-2">
           <button
             type="button"
             onClick={handleAddToCart}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 rounded font-semibold text-sm transition-colors"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 rounded font-semibold text-sm transition-colors"
           >
             Add to cart
           </button>
@@ -187,16 +187,16 @@ export default function ProductDetails({
           <button
             type="button"
             onClick={handleBuyNow}
-            className="border border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-1.5 rounded font-semibold text-sm transition-colors"
+            className="flex-1 border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 md:px-6 py-2 rounded font-semibold text-sm transition-colors"
           >
             Buy now
           </button>
 
           <button
             onClick={() => setLiked(!liked)}
-            className="px-2 py-1.5 border border-slate-300 rounded hover:bg-slate-100"
+            className="px-3 md:px-2 py-2 border border-slate-300 rounded hover:bg-slate-100 transition-colors flex items-center justify-center"
           >
-            <Heart size={16} fill={liked ? "#ef4444" : "none"} className={liked ? "text-red-500" : "text-slate-600"} />
+            <Heart size={18} fill={liked ? "#ef4444" : "none"} className={liked ? "text-red-500" : "text-slate-600"} />
           </button>
         </div>
 
@@ -209,20 +209,20 @@ export default function ProductDetails({
       </div>
 
       {/* Trust Signals */}
-      <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-200 text-center text-xs">
+      <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-200 text-center text-xs md:text-sm">
         <div>
-          <Truck size={18} className="text-blue-600 mx-auto mb-1" />
-          <p className="font-semibold text-slate-900">Free shipping</p>
+          <Truck size={16} className="text-blue-600 mx-auto mb-1" />
+          <p className="font-semibold text-slate-900 text-xs md:text-sm">Free shipping</p>
           <p className="text-slate-600 text-xs">Pan-india</p>
         </div>
         <div>
-          <Shield size={18} className="text-blue-600 mx-auto mb-1" />
-          <p className="font-semibold text-slate-900">Warranty</p>
+          <Shield size={16} className="text-blue-600 mx-auto mb-1" />
+          <p className="font-semibold text-slate-900 text-xs md:text-sm">Warranty</p>
           <p className="text-slate-600 text-xs">Authentic</p>
         </div>
         <div>
-          <Clock size={18} className="text-blue-600 mx-auto mb-1" />
-          <p className="font-semibold text-slate-900">Fast delivery</p>
+          <Clock size={16} className="text-blue-600 mx-auto mb-1" />
+          <p className="font-semibold text-slate-900 text-xs md:text-sm">Fast delivery</p>
           <p className="text-slate-600 text-xs">Quick</p>
         </div>
       </div>
@@ -234,7 +234,7 @@ export default function ProductDetails({
         )}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-full text-center px-4 py-2.5 border-2 border-green-500 text-green-600 font-semibold rounded text-sm hover:bg-green-50 transition-colors flex items-center justify-center gap-2"
+        className="block w-full text-center px-4 py-2 md:py-2.5 border-2 border-green-500 text-green-600 font-semibold rounded text-sm hover:bg-green-50 transition-colors flex items-center justify-center gap-2"
       >
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.006c-1.052 0-2.082.264-2.995.767L7.97 3.90l1.531 4.642c-.547.928-.834 1.995-.834 3.148 0 3.365 2.736 6.1 6.1 6.1h.006c1.624 0 3.15-.624 4.291-1.764 1.141-1.141 1.766-2.667 1.766-4.292 0-3.365-2.736-6.1-6.1-6.1" />
