@@ -1,19 +1,14 @@
 import Link from "next/link";
 import CategoryCard from "./category-card";
-import { supabase } from "@/lib/supabase";
+import { fetchCategories } from "@/services/category-service";
 
 async function getCategories() {
-  const { data, error } = await supabase
-    .from("categories")
-    .select("*")
-    .order("id");
-
-  if (error) {
-    console.error(error);
+  try {
+    return (await fetchCategories()).filter((category) => category.parent_id == null);
+  } catch (error) {
+    console.error("Failed to load categories:", error);
     return [];
   }
-
-  return data;
 }
 
 export default async function CategoriesSection() {
@@ -41,8 +36,8 @@ export default async function CategoriesSection() {
             <CategoryCard
               key={item.id}
               title={item.name}
-              image={item.image_url}
-              href={item.href || `/shop?category=${item.slug}`}
+              image="/images/categories/street-light.jpg"
+              href={`/shop?category=${item.slug}`}
             />
           ))}
         </div>

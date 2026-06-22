@@ -11,6 +11,7 @@ import WhatsAppButton from "@/components/common/whatsapp-button";
 import { supabase } from "@/lib/supabase";
 import { fetchProductDetails } from "@/services/product-details-service";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 interface ProductPageProps {
   params: Promise<{
@@ -83,15 +84,27 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   // Fetch category name
   let categoryName = "";
+  let categorySlug = "";
+  let parentCategory: { name: string; slug: string } | null = null;
 
   if (productRow.category_id) {
     const { data: categoryData } = await supabase
       .from("categories")
-      .select("name")
+      .select("name, slug, parent_id")
       .eq("id", productRow.category_id)
       .single();
 
     categoryName = categoryData?.name ?? "";
+    categorySlug = categoryData?.slug ?? "";
+
+    if (categoryData?.parent_id) {
+      const { data: parentData } = await supabase
+        .from("categories")
+        .select("name, slug")
+        .eq("id", categoryData.parent_id)
+        .single();
+      parentCategory = parentData;
+    }
   }
 
   // Fetch product details
@@ -126,6 +139,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {/* Product Section */}
       <main className="w-full bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6 lg:py-8">
+          <nav aria-label="Breadcrumb" className="mb-5 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+            <Link href="/" className="hover:text-blue-600">Home</Link>
+            <span aria-hidden="true">›</span>
+            {parentCategory && (
+              <>
+                <Link href={`/${parentCategory.slug}`} className="hover:text-blue-600">{parentCategory.name}</Link>
+                <span aria-hidden="true">›</span>
+              </>
+            )}
+            {categoryName && (
+              <Link href={parentCategory ? `/${parentCategory.slug}/${categorySlug}` : `/shop?category=${categorySlug}`} className="hover:text-blue-600">{categoryName}</Link>
+            )}
+            <span aria-hidden="true">›</span>
+            <span className="font-medium text-slate-900">{product.name}</span>
+          </nav>
           <div className="grid gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 items-start">
             {/* Image Gallery - Left */}
             <div className="w-full order-1 lg:order-1">

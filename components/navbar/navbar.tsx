@@ -4,8 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingBag, ChevronDown, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/hooks/use-cart";
+import { buildCategoryTree, categoryHref, fetchCategories } from "@/services/category-service";
+import type { CategoryNode } from "@/types/category";
 
 export default function Navbar() {
   const router = useRouter();
@@ -13,14 +15,14 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState<CategoryNode[]>([]);
   const { isLoaded, totals } = useCart();
 
-  const categories = [
-    { name: "All Products", href: "/shop" },
-    { name: "Solar Street Lights", href: "/shop?category=street-lights" },
-    { name: "Solar Panels", href: "/shop?category=solar-panels" },
-   { name: "Road Safety Products", href: "/shop?category=road-safety" },
-  ];
+  useEffect(() => {
+    fetchCategories()
+      .then((rows) => setCategories(buildCategoryTree(rows)))
+      .catch((error) => console.error("Failed to load navigation categories:", error));
+  }, []);
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -80,15 +82,20 @@ export default function Navbar() {
             {shopOpen && (
               <div className="absolute left-0 top-10 w-60 overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-xl">
 
+                <Link href="/shop" onClick={() => setShopOpen(false)} className="block border-b border-slate-100 px-4 py-3 text-sm text-slate-600 hover:bg-[#FAFBFC] hover:text-[#2D62A8]">
+                  All Products
+                </Link>
                 {categories.map((category) => (
-                  <Link
-                    key={category.name}
-                    href={category.href}
-                    onClick={() => setShopOpen(false)}
-                    className="block px-4 py-3 text-sm text-slate-600 hover:bg-[#FAFBFC] hover:text-[#2D62A8]"
-                  >
-                    {category.name}
-                  </Link>
+                  <div key={category.id} className="border-b border-slate-100 last:border-0">
+                    <Link href={categoryHref(category)} onClick={() => setShopOpen(false)} className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-[#FAFBFC] hover:text-[#2D62A8]">
+                      {category.name}
+                    </Link>
+                    {category.children.map((child) => (
+                      <Link key={child.id} href={categoryHref(child, category)} onClick={() => setShopOpen(false)} className="block border-t border-slate-100 px-7 py-3 text-sm text-slate-600 hover:bg-[#FAFBFC] hover:text-[#2D62A8]">
+                        {child.name}
+                      </Link>
+                    ))}
+                  </div>
                 ))}
 
               </div>
@@ -198,15 +205,18 @@ export default function Navbar() {
               Home
             </Link>
 
+            <Link href="/shop" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#2D62A8]">All Products</Link>
             {categories.map((category) => (
-              <Link
-                key={category.name}
-                href={category.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#2D62A8]"
-              >
-                {category.name}
-              </Link>
+              <div key={category.id}>
+                <Link href={categoryHref(category)} onClick={() => setMobileMenuOpen(false)} className="block rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#2D62A8]">
+                  {category.name}
+                </Link>
+                {category.children.map((child) => (
+                  <Link key={child.id} href={categoryHref(child, category)} onClick={() => setMobileMenuOpen(false)} className="ml-4 block rounded-xl px-3 py-2.5 text-sm text-slate-600 hover:bg-white hover:text-[#2D62A8]">
+                    {child.name}
+                  </Link>
+                ))}
+              </div>
             ))}
 
             <Link

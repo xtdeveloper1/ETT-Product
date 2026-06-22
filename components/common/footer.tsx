@@ -1,8 +1,20 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, MapPin } from "lucide-react";
+import { buildCategoryTree, categoryHref, fetchCategories } from "@/services/category-service";
+import type { CategoryNode } from "@/types/category";
+import { useEffect, useState } from "react";
 
 export default function Footer() {
+  const [categories, setCategories] = useState<CategoryNode[]>([]);
+
+  useEffect(() => {
+    fetchCategories()
+      .then((rows) => setCategories(buildCategoryTree(rows)))
+      .catch((error) => console.error("Failed to load footer categories:", error));
+  }, []);
   return (
     <footer className="mt-9 border-t border-[#E2E8F0] bg-[#F1F5F9]">
 
@@ -34,10 +46,9 @@ export default function Footer() {
 
             <ul className="space-y-2.5 text-sm text-[#64748B]">
               <li><Link href="/shop" className="transition hover:text-[#2D62A8]">All Products</Link></li>
-              <li><Link href="/shop?category=street-lights" className="transition hover:text-[#2D62A8]">Solar Street Lights</Link></li>
-              <li><Link href="/shop?category=solar-panels" className="transition hover:text-[#2D62A8]">Solar Panels</Link></li>
-              <li><Link href="/shop?category=water-pumps" className="transition hover:text-[#2D62A8]">Solar Water Pumps</Link></li>
-              <li><Link href="/shop?category=road-safety" className="transition hover:text-[#2D62A8]">Road Safety</Link></li>
+              {categories.map((category) => (
+                <li key={category.id}><Link href={categoryHref(category)} className="transition hover:text-[#2D62A8]">{category.name}</Link></li>
+              ))}
             </ul>
           </div>
 

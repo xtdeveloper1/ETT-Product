@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchCategories } from "@/services/category-service";
+import type { Category } from "@/types/category";
 
 const initialFormData = {
   fullName: "",
@@ -17,6 +19,13 @@ export default function QuoteForm() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetchCategories()
+      .then((rows) => setCategories(rows.filter((category) => category.parent_id == null)))
+      .catch((loadError) => console.error("Failed to load quote categories:", loadError));
+  }, []);
 
   const updateField = (
     field: keyof typeof initialFormData,
@@ -127,10 +136,9 @@ export default function QuoteForm() {
             className="w-full h-14 px-4 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select a product type</option>
-            <option value="Solar Street Lights">Solar Street Lights</option>
-            <option value="Solar Panels">Solar Panels</option>
-            <option value="Solar Water Pumps">Solar Water Pumps</option>
-            <option value="Road Safety Products">Road Safety Products</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.name}>{category.name}</option>
+            ))}
             <option value="Other">Other</option>
           </select>
         </div>

@@ -1,30 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { categoryHref, fetchCategories } from "@/services/category-service";
 
-const categories = [
-  {
-    title: "Solar Street Lights",
-    image: "/images/categories/street-light.jpg",
-    slug: "street-lights",
-  },
-  {
-    title: "Solar Panels",
-    image: "/images/categories/panel.jpg",
-    slug: "solar-panels",
-  },
-  {
-    title: "Solar Water Pumps",
-    image: "/images/categories/pump.jpg",
-    slug: "water-pumps",
-  },
-  {
-    title: "Road Safety Products",
-    image: "/images/categories/road.jpg",
-    slug: "road-safety",
-  },
-];
-
-export default function ShopCategories() {
+export default async function ShopCategories() {
+  const categories = (await fetchCategories()).filter((category) => category.parent_id == null);
   return (
     <section className="max-w-7xl mx-auto px-6 py-10">
 
@@ -36,14 +15,14 @@ export default function ShopCategories() {
 
         {categories.map((item) => (
           <Link
-            key={item.slug}
-            href={`/shop?category=${item.slug}`}
+            key={item.id}
+            href={categoryHref(item)}
             className="group block bg-white rounded-3xl border overflow-hidden cursor-pointer hover:shadow-lg transition"
           >
             <div className="relative overflow-hidden">
               <Image
-                src={item.image}
-                alt={item.title}
+                src="/images/categories/street-light.jpg"
+                alt={item.name}
                 width={500}
                 height={400}
                 className="h-56 w-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -52,7 +31,7 @@ export default function ShopCategories() {
 
             <div className="p-5">
               <h3 className="font-semibold text-lg">
-                {item.title}
+                {item.name}
               </h3>
             </div>
           </Link>

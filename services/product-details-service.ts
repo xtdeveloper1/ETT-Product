@@ -19,7 +19,7 @@ export interface ProductImage {
   id: string;
   product_id: string;
   image_url: string;
-  alt: string;
+  alt?: string;
   is_primary: boolean;
   sort_order?: number;
 }
@@ -107,7 +107,8 @@ export async function fetchProductImages(
     const { data, error } = await supabase
       .from("product_images")
       .select("*")
-      .eq("product_id", productId);
+      .eq("product_id", productId)
+      .order("sort_order", { ascending: true });
 
     if (error) {
       console.error("Error fetching images:", error);

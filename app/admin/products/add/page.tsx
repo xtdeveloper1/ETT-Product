@@ -14,6 +14,7 @@ interface UploadedImage {
 interface Category {
     id: string;
     name: string;
+    parent_id: string | null;
 }
 
 interface Feature {
@@ -36,6 +37,7 @@ export default function AddProductPage() {
     const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
     const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedParentId, setSelectedParentId] = useState("");
 
     const [formData, setFormData] = useState({
         name: "",
@@ -60,8 +62,8 @@ export default function AddProductPage() {
         const loadCategories = async () => {
             const { data, error } = await supabase
                 .from("categories")
-                .select("id, name")
-                .order("name");
+                .select("id, name, parent_id")
+                .order("sort_order", { ascending: true });
 
             if (error) {
                 console.error("Failed to load categories:", error);
@@ -494,24 +496,47 @@ export default function AddProductPage() {
                         </p>
                     </div>
 
-                    <div>
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <div>
                         <label className="block text-sm font-medium mb-2">
                             Category *
                         </label>
                         <select
-                            name="category_id"
-                            value={formData.category_id}
-                            onChange={handleChange}
+                            value={selectedParentId}
+                            onChange={(event) => {
+                                const parentId = event.target.value;
+                                const hasChildren = categories.some((category) => String(category.parent_id) === parentId);
+                                setSelectedParentId(parentId);
+                                setFormData((current) => ({ ...current, category_id: hasChildren ? "" : parentId }));
+                            }}
                             required
                             className="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Select Category</option>
-                            {categories.map((cat) => (
+                            {categories.filter((cat) => cat.parent_id == null).map((cat) => (
                                 <option key={cat.id} value={cat.id}>
                                     {cat.name}
                                 </option>
                             ))}
                         </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Subcategory</label>
+                        <select
+                            name="category_id"
+                            value={categories.some((category) => String(category.parent_id) === selectedParentId) ? formData.category_id : ""}
+                            onChange={handleChange}
+                            required={categories.some((category) => String(category.parent_id) === selectedParentId)}
+                            disabled={!categories.some((category) => String(category.parent_id) === selectedParentId)}
+                            className="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+                        >
+                            <option value="">{selectedParentId ? "Select Subcategory" : "Select Category first"}</option>
+                            {categories.filter((cat) => String(cat.parent_id) === selectedParentId).map((cat) => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
+                      </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">

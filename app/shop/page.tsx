@@ -10,6 +10,8 @@ import Footer from "@/components/common/footer";
 import WhatsAppButton from "@/components/common/whatsapp-button";
 import { useCart } from "@/hooks/use-cart";
 import { supabase } from "@/lib/supabase";
+import { buildCategoryTree, categoryHref, fetchCategories } from "@/services/category-service";
+import type { Category, CategoryNode } from "@/types/category";
 
 import ShopSidebar from "@/components/products/shop-sidebar";
 import ShopToolbar from "@/components/products/shop-toolbar";
@@ -19,6 +21,7 @@ interface Product {
   id?: number; // numeric ID from Supabase
   category: string;
   categoryId: string;
+  parentCategoryId: string;
   name: string;
   price: number;
   oldPrice: number;
@@ -28,14 +31,10 @@ interface Product {
   href: string;
 }
 
-interface CategoryRow {
-  name: string | null;
-  slug: string | null;
-}
-
 interface SupabaseProductRow {
   id: number;
   category_id: number | string | null;
+  subcategory_id: number | string | null;
   name: string | null;
   slug: string | null;
   description: string | null;
@@ -46,23 +45,14 @@ interface SupabaseProductRow {
   discount: string | null;
   image_url: string | null;
   featured: boolean | null;
-  categories: CategoryRow | CategoryRow[] | null;
 }
-
-const MOBILE_MENU_LINKS = [
-  { name: "Home", href: "/" },
-  { name: "All Products", href: "/shop" },
-  { name: "Solar Street Lights", href: "/shop?category=street-lights" },
-  { name: "Solar Panels", href: "/shop?category=solar-panels" },
-  { name: "Road Safety Products", href: "/shop?category=road-safety" },
-  { name: "Contact", href: "/contact" },
-];
 
 export default function ShopPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { isLoaded, totals } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   
   const [priceRange, setPriceRange] = useState(100000);
   const [sortBy, setSortBy] = useState("featured");
@@ -76,11 +66,11 @@ export default function ShopPage() {
     let isMounted = true;
 
     const fetchProducts = async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select(`
+      const [productResult, categoryResult] = await Promise.all([
+        supabase.from("products").select(`
           id,
           category_id,
+          subcategory_id,
           name,
           slug,
           description,
@@ -90,16 +80,13 @@ export default function ShopPage() {
           rating_count,
           discount,
           image_url,
-          featured,
-          categories (
-            name,
-            slug
-          )
-        `)
-        .order("id", { ascending: true });
+          featured
+        `).order("id", { ascending: true }),
+        fetchCategories(),
+      ]);
 
-      if (error) {
-        console.error(error);
+      if (productResult.error) {
+        console.error(productResult.error);
         return;
       }
 
@@ -107,15 +94,19 @@ export default function ShopPage() {
         return;
       }
 
-      const mappedProducts = ((data ?? []) as SupabaseProductRow[]).map((product) => {
-        const category = Array.isArray(product.categories)
-          ? product.categories[0]
-          : product.categories;
+      const categoryRows = categoryResult as Category[];
+      const categoryById = new Map(categoryRows.map((category) => [String(category.id), category]));
+      const mappedProducts = ((productResult.data ?? []) as SupabaseProductRow[]).map((product) => {
+        const parent = categoryById.get(String(product.category_id));
+        const subcategory = product.subcategory_id == null
+          ? undefined
+          : categoryById.get(String(product.subcategory_id));
 
         return {
           id: product.id,
-          category: category?.name ?? "",
-          categoryId: category?.slug ?? String(product.category_id ?? ""),
+          category: subcategory?.name ?? parent?.name ?? "",
+          categoryId: subcategory?.slug ?? parent?.slug ?? String(product.category_id ?? ""),
+          parentCategoryId: subcategory ? (parent?.slug ?? "") : "",
           name: product.name ?? "",
           price: Number(product.price ?? 0),
           oldPrice: Number(product.old_price ?? 0),
@@ -127,6 +118,7 @@ export default function ShopPage() {
       });
 
       setProducts(mappedProducts);
+      setCategories(categoryRows);
     };
 
     fetchProducts();
@@ -161,14 +153,14 @@ export default function ShopPage() {
 
     // Filter by category
     if (selectedCategory !== "all") {
-      result = result.filter(p => p.categoryId === selectedCategory);
+      result = result.filter(p => p.categoryId === selectedCategory || p.parentCategoryId === selectedCategory);
     }
 
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter((p) =>
-        [p.name, p.category, p.categoryId].some((value) =>
+        [p.name, p.category, p.categoryId, p.parentCategoryId].some((value) =>
           value.toLowerCase().includes(query)
         )
       );
@@ -190,6 +182,14 @@ export default function ShopPage() {
 
     return result;
   }, [products, selectedCategory, searchQuery, priceRange, sortBy]);
+
+  useEffect(() => {
+    if (selectedCategory === "all") return;
+    const current = categories.find((category) => category.slug === selectedCategory);
+    console.info("[shop-filter] current category id:", current?.parent_id ?? current?.id ?? null);
+    console.info("[shop-filter] current subcategory id:", current?.parent_id != null ? current.id : null);
+    console.info("[shop-filter] product count returned:", filteredAndSortedProducts.length);
+  }, [categories, filteredAndSortedProducts.length, selectedCategory]);
 
   return (
     <>
@@ -240,16 +240,17 @@ export default function ShopPage() {
           {mobileMenuOpen && (
             <nav className="border-t border-[#E2E8F0] bg-[#FAFBFC] px-[22px] py-3 shadow-[0_18px_34px_rgba(15,23,42,0.06)]">
               <div className="flex flex-col gap-1">
-                {MOBILE_MENU_LINKS.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]"
-                  >
-                    {link.name}
-                  </Link>
+                <Link href="/" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]">Home</Link>
+                <Link href="/shop" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]">All Products</Link>
+                {buildCategoryTree(categories).map((category: CategoryNode) => (
+                  <div key={category.id}>
+                    <Link href={categoryHref(category)} onClick={() => setMobileMenuOpen(false)} className="block rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]">{category.name}</Link>
+                    {category.children.map((child) => (
+                      <Link key={child.id} href={categoryHref(child, category)} onClick={() => setMobileMenuOpen(false)} className="ml-4 block rounded-xl px-3 py-2 text-sm text-slate-600 hover:bg-white hover:text-[#315FCC]">{child.name}</Link>
+                    ))}
+                  </div>
                 ))}
+                <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]">Contact</Link>
               </div>
             </nav>
           )}

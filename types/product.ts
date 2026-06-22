@@ -2,6 +2,7 @@
 export interface DatabaseProduct {
   id: string | number;
   category_id: string | number;
+  subcategory_id: string | number | null;
   name: string;
   slug: string;
   description: string;
@@ -40,6 +41,8 @@ export interface DatabaseProductSpecification {
 export interface DatabaseCategory {
   id: string | number;
   name: string;
+  slug?: string;
+  parent_id?: string | number | null;
 }
 
 // UI types

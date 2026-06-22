@@ -1,13 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { buildCategoryTree, fetchCategories as loadCategories } from "@/services/category-service";
+import type { Category } from "@/types/category";
 
-interface Category {
-  id: string | number;
-  slug: string;
-  name: string;
-}
 
 interface ShopSidebarProps {
   selectedCategory: string;
@@ -26,18 +22,9 @@ export default function ShopSidebar({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchCategoryOptions = async () => {
       try {
-        const { data, error } = await supabase
-          .from("categories")
-          .select("id, slug, name")
-          .order("name");
-
-        if (error) {
-          console.error("Error fetching categories:", error);
-        } else {
-          setCategories(data || []);
-        }
+        setCategories(await loadCategories());
       } catch (error) {
         console.error("Failed to fetch categories:", error);
       } finally {
@@ -45,17 +32,10 @@ export default function ShopSidebar({
       }
     };
 
-    fetchCategories();
+    fetchCategoryOptions();
   }, []);
 
-  const allCategories = [
-    { id: "all", slug: "all", name: "All products" },
-    ...categories.map((cat) => ({
-      id: cat.id,
-      slug: cat.slug || "",
-      name: cat.name,
-    })),
-  ];
+  const categoryTree = buildCategoryTree(categories);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 space-y-8 h-fit lg:sticky lg:top-6">
@@ -69,19 +49,25 @@ export default function ShopSidebar({
           {loading ? (
             <p className="text-sm text-slate-500">Loading categories...</p>
           ) : (
-            allCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => onCategoryChange(cat.slug || String(cat.id))}
+            <>
+              <button onClick={() => onCategoryChange("all")}
                 className={`block min-h-11 text-left w-full rounded-xl px-3 py-2 text-sm font-medium transition lg:min-h-0 lg:rounded-none lg:px-0 lg:py-0 ${
-                  selectedCategory === (cat.slug || String(cat.id))
+                  selectedCategory === "all"
                     ? "text-blue-600"
                     : "text-slate-600 hover:text-blue-600"
                 }`}
               >
-                {cat.name}
+                All products
               </button>
-            ))
+              {categoryTree.map((category) => (
+                <div key={category.id}>
+                  <button onClick={() => onCategoryChange(category.slug)} className={`block min-h-11 w-full rounded-xl px-3 py-2 text-left text-sm font-medium transition lg:min-h-0 lg:rounded-none lg:px-0 lg:py-0 ${selectedCategory === category.slug ? "text-blue-600" : "text-slate-600 hover:text-blue-600"}`}>{category.name}</button>
+                  {category.children.map((child) => (
+                    <button key={child.id} onClick={() => onCategoryChange(child.slug)} className={`block min-h-11 w-full rounded-xl px-6 py-2 text-left text-sm transition lg:min-h-0 lg:rounded-none lg:py-1.5 ${selectedCategory === child.slug ? "text-blue-600" : "text-slate-500 hover:text-blue-600"}`}>{child.name}</button>
+                  ))}
+                </div>
+              ))}
+            </>
           )}
         </div>
       </div>

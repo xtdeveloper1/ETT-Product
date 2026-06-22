@@ -3,21 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, ShoppingBag, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/hooks/use-cart";
-
-const MENU_LINKS = [
-  { name: "Home", href: "/" },
-  { name: "All Products", href: "/shop" },
-  { name: "Solar Street Lights", href: "/shop?category=street-lights" },
-  { name: "Solar Panels", href: "/shop?category=solar-panels" },
-  { name: "Road Safety Products", href: "/shop?category=road-safety" },
-  { name: "Contact", href: "/contact" },
-];
+import { buildCategoryTree, categoryHref, fetchCategories } from "@/services/category-service";
+import type { CategoryNode } from "@/types/category";
 
 export default function MobileStoreHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [categories, setCategories] = useState<CategoryNode[]>([]);
   const { isLoaded, totals } = useCart();
+
+  useEffect(() => {
+    fetchCategories().then((rows) => setCategories(buildCategoryTree(rows))).catch(console.error);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#E2E8F0] bg-[#FAFBFC]/95 backdrop-blur md:hidden">
@@ -62,16 +60,17 @@ export default function MobileStoreHeader() {
       {menuOpen && (
         <nav className="border-t border-[#E2E8F0] bg-[#FAFBFC] px-[22px] py-3 shadow-[0_18px_34px_rgba(15,23,42,0.06)]">
           <div className="flex flex-col gap-1">
-            {MENU_LINKS.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]"
-              >
-                {link.name}
-              </Link>
+            <Link href="/" onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]">Home</Link>
+            <Link href="/shop" onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]">All Products</Link>
+            {categories.map((category) => (
+              <div key={category.id}>
+                <Link href={categoryHref(category)} onClick={() => setMenuOpen(false)} className="block rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]">{category.name}</Link>
+                {category.children.map((child) => (
+                  <Link key={child.id} href={categoryHref(child, category)} onClick={() => setMenuOpen(false)} className="ml-4 block rounded-xl px-3 py-2 text-sm text-slate-600 hover:bg-white hover:text-[#315FCC]">{child.name}</Link>
+                ))}
+              </div>
             ))}
+            <Link href="/contact" onClick={() => setMenuOpen(false)} className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-[#315FCC]">Contact</Link>
           </div>
         </nav>
       )}
