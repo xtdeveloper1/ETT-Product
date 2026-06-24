@@ -283,7 +283,6 @@ export default function ShopContent() {
         <div className="flex gap-6 md:gap-8">
           {(mobileFiltersOpen || true) && (
             <ShopSidebar
-              categories={categories}
               selectedCategory={selectedCategory}
               onCategoryChange={handleCategoryChange}
               priceRange={priceRange}
