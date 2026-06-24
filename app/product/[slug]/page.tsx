@@ -149,7 +149,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </>
             )}
             {categoryName && (
-              <Link href={parentCategory ? `/${parentCategory.slug}/${categorySlug}` : `/shop?category=${categorySlug}`} className="hover:text-blue-600">{categoryName}</Link>
+              <Link href={parentCategory ? `/${parentCategory.slug}/${categorySlug}` : `/${categorySlug}`} className="hover:text-blue-600">{categoryName}</Link>
             )}
             <span aria-hidden="true">›</span>
             <span className="font-medium text-slate-900">{product.name}</span>

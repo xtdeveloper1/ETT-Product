@@ -3,6 +3,7 @@ export interface Category {
   name: string;
   slug: string;
   parent_id: string | number | null;
+  image_url?: string | null;
 }
 
 export interface CategoryNode extends Category {

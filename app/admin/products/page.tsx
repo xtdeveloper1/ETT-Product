@@ -19,6 +19,7 @@ export default function ProductsPage() {
     const [products, setProducts] = useState<ProductWithCategory[]>([]);
     const [categories, setCategories] = useState<DatabaseCategory[]>([]);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState<string | null>(null);
     const [viewType, setViewType] = useState<ViewType>("grid");
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategoryId, setSelectedCategoryId] = useState("");
@@ -32,47 +33,56 @@ export default function ProductsPage() {
     async function fetchData() {
         try {
             setLoading(true);
+            setFetchError(null);
             
             // Fetch categories first
             const { data: categoriesData, error: catError } = await supabase
                 .from("categories")
-                .select("id, name")
+                .select("id, name, parent_id")
                 .order("name");
 
-            if (!catError) {
+            if (catError) {
+                console.error("Error fetching categories:", catError);
+                setFetchError(catError.message || JSON.stringify(catError));
+            } else {
                 setCategories(categoriesData || []);
             }
 
-            // Fetch products with joined categories
+            // Fetch products (no implicit relational join). Map categories in JS
             const { data: productsData, error: prodError } = await supabase
                 .from("products")
-                .select(`
-                    id,
-                    category_id,
-                    name,
-                    slug,
-                    description,
-                    price,
-                    old_price,
-                    rating,
-                    rating_count,
-                    discount,
-                    image_url,
-                    featured,
-                    created_at,
-                    short_description,
-                    stock,
-                    is_active,
-                    categories!inner(id, name)
-                `)
+                .select(
+                    `id, category_id, subcategory_id, name, slug, description, price, old_price, rating, rating_count, discount, image_url, featured, created_at, short_description, stock, is_active`
+                )
                 .order("created_at", { ascending: false });
 
             if (prodError) {
-                console.error(prodError);
-                return;
-            }
+                console.error("Error fetching products:", prodError);
+                setFetchError(prodError.message || JSON.stringify(prodError));
+                setProducts([]);
+            } else {
+                const prods = (productsData || []).map((p: any) => {
+                    // attach categories array: prefer subcategory if available, otherwise category
+                    const cats: any[] = [];
+                    const subcat = categoriesData?.find((c: any) => String(c.id) === String(p.subcategory_id));
+                    const parentcat = categoriesData?.find((c: any) => String(c.id) === String(p.category_id));
 
-            setProducts(productsData || []);
+                    if (subcat) {
+                        cats.push(subcat);
+                        // also push its parent if exists and is different
+                        const parentOfSub = categoriesData?.find((c: any) => String(c.id) === String(subcat.parent_id));
+                        if (parentOfSub && String(parentOfSub.id) !== String(subcat.id)) {
+                            cats.unshift(parentOfSub);
+                        }
+                    } else if (parentcat) {
+                        cats.push(parentcat);
+                    }
+
+                    return { ...p, categories: cats };
+                });
+
+                setProducts(prods);
+            }
         } catch (error) {
             console.error(error);
         } finally {
@@ -239,6 +249,12 @@ export default function ProductsPage() {
                         </button>
                     </div>
                 </div>
+
+                    {fetchError && (
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
+                            <strong>Error:</strong> {fetchError}
+                        </div>
+                    )}
             </div>
         );
     };

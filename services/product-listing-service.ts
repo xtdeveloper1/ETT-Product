@@ -24,12 +24,14 @@ export async function fetchProductsForCategory(category: Category): Promise<List
   console.info("[category-products] current category id:", isSubcategory ? category.parent_id : category.id);
   console.info("[category-products] current subcategory id:", isSubcategory ? category.id : null);
 
+  console.time(`[category-products] query ${category.slug}`);
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_FIELDS)
     .eq(queryColumn, category.id)
     .eq("is_active", true)
     .order("id", { ascending: true });
+  console.timeEnd(`[category-products] query ${category.slug}`);
 
   if (error) throw error;
 

@@ -21,11 +21,12 @@ export default async function ShopCategories() {
           >
             <div className="relative overflow-hidden">
               <Image
-                src="/images/categories/street-light.jpg"
+                src={item.image_url || "/images/categories/street-light.jpg"}
                 alt={item.name}
                 width={500}
                 height={400}
                 className="h-56 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                unoptimized={item.image_url?.startsWith("http") || item.image_url?.includes("supabase")}
               />
             </div>
 

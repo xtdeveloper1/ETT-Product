@@ -20,16 +20,16 @@ export default function MobileStoreHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-[#E2E8F0] bg-[#FAFBFC]/95 backdrop-blur md:hidden">
       <div className="flex h-[64px] items-center justify-between px-[22px]">
-        <Link href="/" className="flex min-w-0 items-center gap-1.5">
+        <Link href="/" className="flex flex-1 min-w-0 items-center gap-2">
           <Image
-            src="/images/brand/ett-green-logo.svg"
+            src="/images/brand/ett-green-logo.png"
             alt="ETT logo"
             width={32}
             height={32}
-            className="h-8 w-8 rounded-full object-contain flex-shrink-0"
+            className="h-8 w-8 object-contain shrink-0"
             priority
           />
-          <span className="truncate text-[12px] font-bold text-[#111827]">
+          <span className="min-w-0 truncate text-[12px] font-bold text-[#111827]">
             ENVIRO TECH
           </span>
         </Link>

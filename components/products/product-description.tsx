@@ -45,11 +45,11 @@ export default function ProductDescription({
                     <span className="text-blue-600 font-bold flex-shrink-0 mt-0.5">✓</span>
                     <div>
                       <p className="font-semibold text-slate-900">
-                        {spec.name || spec.spec_key}
+                        {spec.name}
                       </p>
-                      {(spec.value || spec.spec_value) && (
+                      {spec.value && (
                         <p className="text-xs text-slate-600 mt-0.5">
-                          {spec.value || spec.spec_value}
+                          {spec.value}
                         </p>
                       )}
                     </div>

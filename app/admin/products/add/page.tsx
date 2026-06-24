@@ -60,15 +60,33 @@ export default function AddProductPage() {
     // Load categories on mount
     useEffect(() => {
         const loadCategories = async () => {
-            const { data, error } = await supabase
-                .from("categories")
-                .select("id, name, parent_id")
-                .order("sort_order", { ascending: true });
+            try {
+                // Try ordering by sort_order if present, otherwise fall back to name
+                let res = await supabase
+                    .from("categories")
+                    .select("id, name, parent_id")
+                    .order("sort_order", { ascending: true });
 
-            if (error) {
-                console.error("Failed to load categories:", error);
-            } else {
-                setCategories(data || []);
+                if (res.error) {
+                    console.warn("sort_order ordering failed, retrying by name", res.error);
+                    res = await supabase
+                        .from("categories")
+                        .select("id, name, parent_id")
+                        .order("name", { ascending: true });
+                }
+
+                const { data, error } = res;
+                if (error) {
+                    console.error("Failed to load categories:", error);
+                    setError(error.message || JSON.stringify(error));
+                    setCategories([]);
+                } else {
+                    setCategories(data || []);
+                }
+            } catch (err) {
+                console.error("Unexpected error loading categories:", err);
+                setError(String(err));
+                setCategories([]);
             }
         };
 

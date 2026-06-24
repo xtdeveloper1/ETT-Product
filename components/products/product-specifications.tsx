@@ -36,10 +36,10 @@ export default function ProductSpecifications({
                   }`}
                 >
                   <td className="px-4 md:px-6 py-3 font-semibold text-slate-900 text-sm">
-                    {spec.name || spec.spec_key}
+                    {spec.name}
                   </td>
                   <td className="px-4 md:px-6 py-3 text-slate-700 text-sm text-right">
-                    {spec.value || spec.spec_value}
+                    {spec.value}
                   </td>
                 </tr>
               ))}

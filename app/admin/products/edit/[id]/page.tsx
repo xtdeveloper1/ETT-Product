@@ -55,7 +55,7 @@ export default function EditProductPage() {
         old_price: "",
         description: "",
         stock: "",
-        is_featured: false,
+        featured: false,
         is_active: true,
     });
 
@@ -73,13 +73,22 @@ export default function EditProductPage() {
 
     async function fetchProduct() {
         try {
-            const { data: categoryRows, error: categoryError } = await supabase
+            // Load categories, try sort_order first then fallback to name
+            let res = await supabase
                 .from("categories")
                 .select("id, name, parent_id")
                 .order("sort_order", { ascending: true });
 
-            if (categoryError) throw categoryError;
-            const loadedCategories = (categoryRows ?? []) as Category[];
+            if (res.error) {
+                console.warn("sort_order ordering failed for categories, retrying by name", res.error);
+                res = await supabase
+                    .from("categories")
+                    .select("id, name, parent_id")
+                    .order("name", { ascending: true });
+            }
+
+            if (res.error) throw res.error;
+            const loadedCategories = (res.data ?? []) as Category[];
             setCategories(loadedCategories);
 
             // Fetch product
@@ -104,7 +113,7 @@ export default function EditProductPage() {
                 old_price: productData.old_price?.toString() || "",
                 description: productData.description || "",
                 stock: productData.stock?.toString() || "",
-                is_featured: productData.is_featured ?? false,
+                featured: productData.featured ?? false,
                 is_active: productData.is_active ?? true,
             });
             const assignedCategory = loadedCategories.find((category) => String(category.id) === String(productData.category_id));
@@ -313,7 +322,7 @@ export default function EditProductPage() {
                     description: formData.description,
                     image_url: uploadedImages[primaryImageIndex].url,
                     stock: Number(formData.stock),
-                    featured: formData.is_featured,
+                    featured: formData.featured,
                     is_active: formData.is_active,
                 })
                 .eq("id", productId);
@@ -632,8 +641,8 @@ export default function EditProductPage() {
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="checkbox"
-                                        name="is_featured"
-                                        checked={formData.is_featured}
+                                        name="featured"
+                                        checked={formData.featured}
                                         onChange={handleChange}
                                         className="w-4 h-4 border-slate-300 rounded"
                                     />

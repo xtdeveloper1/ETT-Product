@@ -92,7 +92,7 @@ export const createRazorpayOptions = ({
     },
     handler: onSuccess,
     modal: {
-      ondismiss: onError,
+      ondismiss: () => onError(new Error("Payment cancelled by user")),
     },
     theme: {
       color: "#2563EB", // Blue color to match your theme

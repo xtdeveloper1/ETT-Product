@@ -11,7 +11,7 @@ export default async function FeaturedProducts() {
     .limit(4);
 
   if (error) {
-    console.error(error);
+    console.error("FeaturedProducts fetch error:", error);
     return null;
   }
 

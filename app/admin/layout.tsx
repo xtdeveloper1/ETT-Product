@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
     ShoppingCart,
@@ -7,6 +10,7 @@ import {
     FileText,
     MessageSquare,
     Settings,
+    LogOut,
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -14,6 +18,13 @@ export default function AdminLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const pathname = usePathname();
+    const isLoginPage = pathname === "/admin/login";
+
+    if (isLoginPage) {
+        return <>{children}</>;
+    }
+
     return (
         <div className="min-h-screen bg-slate-100 flex">
 
@@ -118,8 +129,15 @@ export default function AdminLayout({
                                 Enviro Tech
                             </p>
                         </div>
-                    </div>
 
+                        <Link
+                            href="/admin/logout"
+                            className="ml-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                            <LogOut size={16} />
+                            Logout
+                        </Link>
+                    </div>
                 </header>
 
                 {/* Page Content */}

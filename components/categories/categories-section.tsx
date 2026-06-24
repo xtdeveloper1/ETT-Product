@@ -6,7 +6,7 @@ async function getCategories() {
   try {
     return (await fetchCategories()).filter((category) => category.parent_id == null);
   } catch (error) {
-    console.error("Failed to load categories:", error);
+    console.warn("Failed to load categories:", error instanceof Error ? error.message : JSON.stringify(error));
     return [];
   }
 }
@@ -36,8 +36,8 @@ export default async function CategoriesSection() {
             <CategoryCard
               key={item.id}
               title={item.name}
-              image="/images/categories/street-light.jpg"
-              href={`/shop?category=${item.slug}`}
+              image={item.image_url || "/images/categories/street-light.jpg"}
+              href={`/${item.slug}`}
             />
           ))}
         </div>

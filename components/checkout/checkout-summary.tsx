@@ -221,6 +221,9 @@ export default function CheckoutSummary({ checkoutData }: CheckoutSummaryProps) 
               width={48}
               height={48}
               className="rounded-lg flex-shrink-0"
+              unoptimized={
+                item.image_url.startsWith("http") || item.image_url.includes("supabase")
+              }
             />
 
             <div className="flex-1 min-w-0">
