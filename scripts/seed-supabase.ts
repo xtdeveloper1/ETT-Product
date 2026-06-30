@@ -119,12 +119,12 @@ const categories: CategorySeed[] = [
     sort_order: 2,
   },
   {
-    id: "water-pumps",
-    slug: "water-pumps",
-    name: "Solar Water Pumps",
+    id: "solar-lithium-batteries",
+    slug: "solar-lithium-batteries",
+    name: "Solar Lithium Batteries",
     product_count: 12,
     image: "/images/categories/pump.jpg",
-    href: "/shop?category=water-pumps",
+    href: "/shop?category=solar-lithium-batteries",
     sort_order: 3,
   },
   {
@@ -277,8 +277,8 @@ const products: ProductSeed[] = [
   {
     id: "solar-pump-1.5hp",
     slug: "solar-pump-1.5hp",
-    category_id: "water-pumps",
-    category: "SOLAR WATER PUMPS",
+    category_id: "solar-lithium-batteries",
+    category: "SOLAR LITHIUM BATTERIES",
     name: "Solar Submersible Pump 1.5 HP",
     price: 18999,
     old_price: 22999,
@@ -299,8 +299,8 @@ const products: ProductSeed[] = [
   {
     id: "solar-pump-2hp",
     slug: "solar-pump-2hp",
-    category_id: "water-pumps",
-    category: "SOLAR WATER PUMPS",
+    category_id: "solar-lithium-batteries",
+    category: "SOLAR LITHIUM BATTERIES",
     name: "Solar Surface Pump 2 HP",
     price: 24999,
     old_price: 29999,

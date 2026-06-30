@@ -236,7 +236,7 @@ export default function DashboardPage() {
                                                 <p className="text-sm text-slate-500">{order.email}</p>
                                             </div>
                                         </td>
-                                        <td className="p-4">₹{order.total_amount.toLocaleString("en-IN")}</td>
+                                        <td className="p-4">₹{order.total_amount != null ? order.total_amount.toLocaleString("en-IN") : "0"}</td>
                                         <td className="p-4">
                                             <span
                                                 className={`px-3 py-1 rounded-full text-sm font-medium ${

@@ -10,7 +10,7 @@ const inter = Inter({
 export const metadata = {
   title: "ENVIRO TECH TECHNOLOGIES",
   description:
-    "Solar Street Lights, Solar Panels, Water Pumps and Road Safety Products",
+    "Solar Street Lights, Solar Panels, Solar Lithium Batteries and Road Safety Products",
 };
 
 export default function RootLayout({

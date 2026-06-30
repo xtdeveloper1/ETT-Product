@@ -23,7 +23,7 @@ export default function Hero() {
 
           {/* Description */}
        <p className="mt-3 max-w-[330px] text-sm leading-[1.45] text-[#64748B] md:text-base md:leading-normal">
-        Street lights, panels, water pumps and road safety gear —
+        Street lights, panels, Solar Lithium Batteries and road safety gear —
         delivered across India.
        </p>
 
